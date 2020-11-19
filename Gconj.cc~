@@ -1,0 +1,45 @@
+#include <iostream>
+#include <cmath>
+
+using namespace std;
+using namespace Eigen;
+
+
+VectorXd GradienConjugue(VectorXd x0,VectorXd b,matrix<double,Dynamic,Daynamic> A,int kmax){
+  int n=x0.size();
+  int k=0;
+  double epsilon;
+  double alpha;
+  VectorXd r,p,z,x;
+  double beta=0,gamma=0;
+  x=x0
+  r=b-A*x0;
+  p=r;
+  beta=sqrt(r.dot(r));
+  while(beta>epsilon)&&(k<kmax+1){
+    z=A*p;
+    alpha=r.dot(r)/z.dot(p);
+    x=x-alpha*p;
+    beta=sqrt(r.dot(r));
+    gamma=(r-alpha*z).dot(r-alpha*z)/r.dot(r);
+    r=r-alpha*z;
+    p=r+gamma*p;
+    k=k+1;
+  }
+  if(beta>epsilon){
+    cout<<'Tolerance non atteinte: '<<beta<<endl; 
+  }else{
+    return x;
+  }
+}
+
+
+
+
+
+
+int main(){
+ 
+
+  return 0; 
+}
