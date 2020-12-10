@@ -115,14 +115,7 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>> QR(Eigen::Matrix<double, Dynamic
     p=I-2*w*transpose(w);
     r.col(k+1)=P*r.
     
-
-
   }
-
-
-
-
-
 }
 
 

@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <random>
 #include <Eigen>
+#include <vector>
+#include "methode.h"
 
 using namespace std;
 using namespace Eigen;
@@ -60,11 +62,17 @@ Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
 
 int main(){
   int n;
-  Eigen::Matrix<double, Dynamic, Dynamic>p;
+  Eigen::Matrix<double, Dynamic, Dynamic>;
+  Eigen::VectorXd b,X0;
   cout<<"donner n"<<endl;
   cin>>n;
-  gene_matrice(n);
-  cout<<gene_matrice(n);<<endl;
+  b.resize(n);
+  X0.resize(n);
+  X0(0)=1;
+  
+ 
+  GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
+  cout<<gene_matrice(n)<<endl;
   
  
   return 0;
