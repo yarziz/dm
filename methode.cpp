@@ -14,8 +14,11 @@ using namespace std;
 using namespace Eigen;
 Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
 {
+  Eigen::VectorXd z ;
+  double alpha=0;
   int n = x0.size() ;
   A.resize(n,n) ;
+  z.resize(n);
   Eigen::VectorXd r, X ;
   r.resize(n);
   X.resize(n) ;
@@ -24,10 +27,8 @@ Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matr
   int k = 0 ;
   while ((sqrt(r.dot(r)) > eps) && (k <= kmax))
   {
-    Eigen::VectorXd z ;
-    z.resize(n);
     z = A*r ;
-    double alpha = (r.dot(r))/(r.dot(z));
+    alpha = (r.dot(r))/(r.dot(z));
     X += alpha*r ;
     r = r - alpha*z ;
     k += 1 ;
@@ -211,10 +212,10 @@ Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Ma
   return X;
 }
 
-Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double, Dynamic, Dynamic> A, int kmax){
+Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double, Dynamic, Dynamic> A, int kmax, double epsilon){
   int n=x0.size();
   int k=0;
-  double epsilon;
+ 
   double alpha;
   Eigen::VectorXd r,rn,p,z,x;
   double beta=0,gamma=0;

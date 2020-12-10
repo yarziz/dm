@@ -77,8 +77,9 @@ int main(){
   a=gene_matrice(n);
  
   
-  //x=GPO(x0,b,kmax,a,eps);
-  x=Residuminimum(x0,b,kmax,a,eps);
+  x=GPO(x0,b,kmax,a,eps);
+  //x=Residuminimum(x0,b,kmax,a,eps);
+  //x=GradienConjugue(x0,b,a,kmax,eps);
   cout<<"--------------------------"<<endl;
   cout<<x<<endl;
   cout<<"--------------------------"<<endl;
