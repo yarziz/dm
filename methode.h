@@ -13,4 +13,5 @@ std::vector<Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>> Arnoldi(Eigen::
 Eigen::VectorXd cholesky_resolution(Eigen::MatrixXd A, Eigen::VectorXd b);
 Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> A, double eps);
 Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> A, int kmax);
+Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> A, double eps);
 //std::vector<Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>> QR(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> a);

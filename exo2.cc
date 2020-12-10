@@ -62,8 +62,8 @@ Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
 
 int main(){
   int n;
-  int kmax=10000;
-  double eps=0.00001;
+  int kmax=100000;
+  double eps=0.0001;
   Eigen::Matrix<double, Dynamic, Dynamic> a;
   Eigen::VectorXd b,x0,x;
   cout<<"donner n"<<endl;
@@ -75,9 +75,10 @@ int main(){
   }
   x0(0)=1;
   a=gene_matrice(n);
-  cout<<a<<endl;
+ 
   
-  x=GPO(x0,b,kmax,a,eps);
+  //x=GPO(x0,b,kmax,a,eps);
+  x=Residuminimum(x0,b,kmax,a,eps);
   cout<<"--------------------------"<<endl;
   cout<<x<<endl;
   cout<<"--------------------------"<<endl;
