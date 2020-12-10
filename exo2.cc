@@ -62,17 +62,28 @@ Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
 
 int main(){
   int n;
-  Eigen::Matrix<double, Dynamic, Dynamic>;
-  Eigen::VectorXd b,X0;
+  int kmax=10000;
+  double eps=0.00001;
+  Eigen::Matrix<double, Dynamic, Dynamic> a;
+  Eigen::VectorXd b,x0,x;
   cout<<"donner n"<<endl;
   cin>>n;
   b.resize(n);
-  X0.resize(n);
-  X0(0)=1;
+  x0.resize(n);
+  for(int i=0;i<n;i++){
+    b(i)=1;
+  }
+  x0(0)=1;
+  a=gene_matrice(n);
+  cout<<a<<endl;
   
- 
-  GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
-  cout<<gene_matrice(n)<<endl;
+  x=GPO(x0,b,kmax,a,eps);
+  cout<<"--------------------------"<<endl;
+  cout<<x<<endl;
+  cout<<"--------------------------"<<endl;
+  cout<<a*x<<endl;
+  cout<<"--------------------------"<<endl;
+  cout<<(a*x-b).maxCoeff()<<endl;
   
  
   return 0;
