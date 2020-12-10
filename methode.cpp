@@ -17,9 +17,9 @@ Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matr
   Eigen::VectorXd z ;
   double alpha=0;
   int n = x0.size() ;
+  Eigen::VectorXd r, X ;
   A.resize(n,n) ;
   z.resize(n);
-  Eigen::VectorXd r, X ;
   r.resize(n);
   X.resize(n) ;
   X=x0 ;
@@ -45,8 +45,11 @@ Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matr
 }
 Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
 {
+  Eigen::VectorXd z ;
+  double alpha=0;
   int n = x0.size() ;
   A.resize(n,n) ;
+  z.resize(n);  
   Eigen::VectorXd r, X ;
   r.resize(n);
   X.resize(n) ;
@@ -55,10 +58,8 @@ Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, E
   int k = 0 ;
   while ((sqrt(r.dot(r))>eps) && (k<=kmax))
   {
-    Eigen::VectorXd z ;
-    z.resize(n);
     z = A*r ;
-    double alpha = (r.dot(z))/(z.dot(z)) ;
+    alpha = (r.dot(z))/(z.dot(z)) ;
     X += alpha*r ;
     r = r - alpha*z ;
     k+=1;
