@@ -82,7 +82,48 @@ Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Ma
   }
 */
 
+vector<Eigen::Matrix<double, Dynamic, Dynamic>> QR(Eigen::Matrix<double, Dynamic, Dynamic> a){
+  n=a.rows();
+  m=a.cols();
+  I=MatrixXd::Identity(n,n);
+  Eigen::Matrix<double, Dynamic, Dynamic> p;
+  Eigen::VectorXd w, s, z;
+  double beta=0;
+  double s=0;
+  
+  for(int k=0;k<m;k++){
+    if(k>0){
+      r.col(k)=
+	}
+    s=0;
+    for(int i=k;i<n;i++){
+      s=s+a(i,k)*a(i,k);
+    }
+    beta=sign(a(k,k))*sqrt(s);
+    for(int j=0;j<n;j++){
+      if(j<k){
+	z(j)=0;
+      }
+      if(j==k){
+	z(j)=beta+a(j,j);
+      }
+      if(j>k){
+	z(j)=a(j,k);
+      }
+    }
+    w=(1/sqrt(z.dot(z)))*z;
+    p=I-2*w*transpose(w);
+    r.col(k+1)=P*r.
+    
 
+
+  }
+
+
+
+
+
+}
 
 
 

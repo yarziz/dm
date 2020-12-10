@@ -60,9 +60,12 @@ Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
 
 int main(){
   int n;
+  Eigen::Matrix<double, Dynamic, Dynamic>p;
   cout<<"donner n"<<endl;
   cin>>n;
-  cout<<gene_matrice(n)<<endl;
+  gene_matrice(n);
+  cout<<gene_matrice(n);<<endl;
+  
  
   return 0;
 }
