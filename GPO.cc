@@ -148,19 +148,20 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>> Arnoldi(Eigen::VectorXd r, Eigen
   {
     for (int i = 0 ; i < j ; ++i )
     {
-      H.insert(i+1,j+1) = Vm.col(j).dot(A*Vm.col(i));
+      H.insert(i,j) = Vm.col(i).dot(A*Vm.col(j));
     }
-    for (int p = 1 ; p < m+1 ; ++p)
+    s.setZero();
+    for (int p = 0 ; p < m ; ++p)
     {
-      s+=H.coeffRef(p,j+1)*Vm.col(p-1);
+      s+=H.coeffRef(p,j)*Vm.col(p);
     }
     z = A*Vm.col(j) - s ;
-    H.coeffRef(j+2,j+1) = sqrt(z.dot(z));
-    if (H.coeffRef(j+2,j+1) == 0)
+    H.coeffRef(j+1,j) = sqrt(z.dot(z));
+    if (H.coeffRef(j+1,j) == 0)
     {
       break;
     }
-    Vm.col(j+1) = (1/H.coeffRef(j+2,j+1))*z;
+    Vm.col(j+1) = (1/H.coeffRef(j+1,j))*z;
   }
   Hm = MatrixXd(H);
   X.push_back(Hm);

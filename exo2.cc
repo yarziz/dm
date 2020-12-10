@@ -44,7 +44,6 @@ Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
       b(i,j)= ((double) rand())/(double) RAND_MAX;
     }
   }
-  cout<<b<<endl;
   b_bt=b.transpose()*b;
   b_bt=somme(b_bt,n)*b_bt;
   a=b_bt;
