@@ -96,15 +96,15 @@ int main(){
   //x=Residuminimum(x0,b,kmax,a,eps);
   //x=GradienConjugue(x0,b,a,kmax,eps);
   
-  //x=FOM(x0,b,a,kmax,eps);
+  x=FOM(x0,b,a,kmax,eps);
   //cout<<"--------------------------"<<endl;
   //cout<<x<<endl;
   //cout<<"--------------------------"<<endl;
   //cout<<a*x<<endl;
   //cout<<"--------------------------"<<endl;
-  //cout<<(a*x-b).maxCoeff()<<endl;
+  cout<<(a*x-b).maxCoeff()<<endl;
   //cout<<Arnoldi(b-a*x0,a)[0]<<endl;
-  cout<<cholesky_resolution(a,b)<<endl;
+  //cout<<cholesky_resolution(a,b)<<endl;
  
  
   return 0;

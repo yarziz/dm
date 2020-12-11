@@ -122,15 +122,12 @@ Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, E
 
 Eigen::MatrixXd cholesky_decomposition(Eigen::MatrixXd A)
 {
-
-
   int i,j,k,n;
   double s,p;
   n=A.cols();
   Eigen::SparseMatrix<double> Lm(n,n);
   Eigen::Matrix<double, Dynamic, Dynamic> L;
   L.resize(n,n);
-
   L = MatrixXd(Lm);
   for (i=0;i<n;i++)
     {
@@ -140,9 +137,6 @@ Eigen::MatrixXd cholesky_decomposition(Eigen::MatrixXd A)
 	  s=s+pow(L(i,k),2);
 	}
       p=A(i,i)-s;
-
-
-
       L(i,i)=sqrt(p);
 
       for(j=i+1;j<n;j++)
@@ -340,11 +334,8 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
     beta=sqrt(r.dot(r));
     k=k+1;
   }
-  if(beta>epsilon){
-    std::cout<<"Tolerance non atteinte: "<<beta<<std::endl; 
-  }else{
-    return x;
-  }
+  
+  return x;
 }
 
 
