@@ -30,6 +30,21 @@ double somme(Matrix<double,Dynamic,Dynamic> a,int n){
 }
 
 
+Matrix<double,Dynamic,Dynamic> gene_matrice_tri(Matrix<double,Dynamic,Dynamic> a,int n){
+  Matrix<double,Dynamic,Dynamic> tri; 
+  a.resize(n,n);
+  tri.resize(n,n);
+  tri.setZero();
+  for(int j=0;j<n;j++){
+    tri(j,j)=a(j,j);
+  }
+
+  for(int i=0;i<n-1;i++){
+    tri(i+1,i)=a(i+1,i);
+    tri(i,i+1)=a(i,i+1);
+  }
+  return tri;
+}
 
 
 Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
@@ -75,18 +90,22 @@ int main(){
   }
   x0(0)=1;
   a=gene_matrice(n);
- 
+  a=gene_matrice_tri(a,n);
   
-  x=GPO(x0,b,kmax,a,eps);
+  //x=GPO(x0,b,kmax,a,eps);
   //x=Residuminimum(x0,b,kmax,a,eps);
   //x=GradienConjugue(x0,b,a,kmax,eps);
+  
+  //x=FOM(x0,b,a,kmax,eps);
   //cout<<"--------------------------"<<endl;
   //cout<<x<<endl;
   //cout<<"--------------------------"<<endl;
   //cout<<a*x<<endl;
   //cout<<"--------------------------"<<endl;
   //cout<<(a*x-b).maxCoeff()<<endl;
-  cout<<Arnoldi(b-a*x0,a)[1]*(Arnoldi(b-a*x0,a)[1].transpose())<<endl;
+  //cout<<Arnoldi(b-a*x0,a)[0]<<endl;
+  cout<<cholesky_resolution(a,b)<<endl;
+ 
  
   return 0;
 }
