@@ -80,13 +80,13 @@ int main(){
   x=GPO(x0,b,kmax,a,eps);
   //x=Residuminimum(x0,b,kmax,a,eps);
   //x=GradienConjugue(x0,b,a,kmax,eps);
-  cout<<"--------------------------"<<endl;
-  cout<<x<<endl;
-  cout<<"--------------------------"<<endl;
-  cout<<a*x<<endl;
-  cout<<"--------------------------"<<endl;
-  cout<<(a*x-b).maxCoeff()<<endl;
-  
+  //cout<<"--------------------------"<<endl;
+  //cout<<x<<endl;
+  //cout<<"--------------------------"<<endl;
+  //cout<<a*x<<endl;
+  //cout<<"--------------------------"<<endl;
+  //cout<<(a*x-b).maxCoeff()<<endl;
+  cout<<Arnoldi(b-a*x0,a)[1]*(Arnoldi(b-a*x0,a)[1].transpose())<<endl;
  
   return 0;
 }

@@ -148,30 +148,36 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>> Arnoldi(Eigen::VectorXd r, Eigen
   Eigen::VectorXd v, s, z;
   vector<Eigen::Matrix<double, Dynamic, Dynamic>> X ;
   int m = r.size();
-  Eigen::SparseMatrix<double> H(m,m) ;
-  Vm.resize(m,m);
+  //Eigen::SparseMatrix<double> H(m,m) ;
+  Vm.resize(m,m+1);
+  Hm.resize(m+1,m);
+  Hm.setZero();
+  Vm.setZero();
+  v.resize(m);
+  s.resize(m);
+  z.resize(m);
   v = (1./sqrt(r.dot(r)))*r;
   Vm.col(0) = v ;
+  
   for (int j = 0 ; j < m ; ++j )
   {
-    for (int i = 0 ; i < j ; ++i )
+    for (int i = 0 ; i < j+1 ; ++i )
     {
-      H.insert(i,j) = Vm.col(i).dot(A*Vm.col(j));
+      Hm(i,j) = (Vm.col(i)).dot(A*(Vm.col(j)));
     }
     s.setZero();
-    for (int p = 0 ; p < m ; ++p)
+    for (int p = 0 ; p < j+1 ; ++p)
     {
-      s+=H.coeffRef(p,j)*Vm.col(p);
+      s+=Hm(p,j)*(Vm.col(p));
     }
-    z = A*Vm.col(j) - s ;
-    H.coeffRef(j+1,j) = sqrt(z.dot(z));
-    if (H.coeffRef(j+1,j) == 0)
+    z = A*(Vm.col(j)) - s ;
+    Hm(j+1,j) = sqrt(z.dot(z));
+    if (Hm(j+1,j) == 0)
     {
       break;
     }
-    Vm.col(j+1) = (1/H.coeffRef(j+1,j))*z;
+    Vm.col(j+1) = (1/Hm(j+1,j))*z;
   }
-  Hm = MatrixXd(H);
   X.push_back(Hm);
   X.push_back(Vm);
 
