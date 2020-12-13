@@ -326,9 +326,9 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
     W=Arnoldi(r,A);
     W0=new_matrix(W[0]);
     W1=new_matrixx(W[1]);
-    //cout<<W0<<endl;
-    y=cholesky_resolution(W0,beta*e1);
-    cout<<y<<endl;
+    //y=cholesky_resolution(W0,beta*e1);
+    y=qr_resolution(W0,beta*e1);
+      //cout<<y<<endl;
     x=x+W1*y;
     r=-W[0](n,n-1)*y(n-1)*(W[1].col(n));
     beta=sqrt(r.dot(r));
@@ -339,42 +339,102 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
 }
 
 
-/*
-  vector<Eigen::Matrix<double, Dynamic, Dynamic>> QR(Eigen::Matrix<double, Dynamic, Dynamic> a){
-  /*
-  n=a.rows();
-  m=a.cols();
-  I=MatrixXd::Identity(n,n);
-  Eigen::Matrix<double, Dynamic, Dynamic> p;
-  Eigen::VectorXd w, s, z;
-  double beta=0;
-  double s=0;
+
+
+
+
+
+vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixXd A)
+{
+  int n = A.cols();
+  double beta;
+  Eigen::Matrix<double, Dynamic, Dynamic>  H,W,Q,R,S,B,D,I;
+  VectorXd z,w,x,e;
+  vector<Eigen::Matrix<double, Dynamic, Dynamic>> P,X ;
+  R = A ;
+
+  Q = MatrixXd::Identity(n,n);
+
+
+  for (int k = 0 ; k<n ; ++k)
+  {
+    e.resize(n-k);
+    e.setZero();
+    e(0) = 1;
+    H = MatrixXd::Identity(n,n);
+    I = MatrixXd::Identity(n-k,n-k);
+
+    z.resize(n-k) ;
+    w.resize(n-k);
+    z.setZero() ;
+
+
+    x = R.col(k).segment(k,n-k);
+    z = x + sqrt(x.dot(x))*e ;
+
+    w = (1/(sqrt(z.dot(z))))*z ;
+
+    D = I - 2*w*(w.transpose()) ;
+    if (k==0)
+    {
+      H = D ;
+    }
+    H.block(k,k,n-k,n-k) = D;
+    P.push_back(H);
+    R = H*R;
+  }
+  for (int i = 0 ; i<n ; ++i)
+  {
+    Q=Q*P[i] ;
+  }
+  X.push_back(Q);
+  X.push_back(R);
+  return X;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Eigen::VectorXd qr_resolution(Eigen::MatrixXd A, Eigen::VectorXd b)
+{
+  vector<Eigen::Matrix<double, Dynamic, Dynamic>> QR;
+  //Eigen::Matrix<double, Dynamic, Dynamic> Q;
+  Eigen::Matrix<double, Dynamic, Dynamic> R;
+  Eigen::VectorXd x,q;
+  int n = A.cols();
+  int i,j,k ;
+  double s, p;
+  b.resize(n);
+  A.resize(n,n);
+  q.resize(n);
+  R.resize(n,n);
+  QR=qr_decomposition(A) ;
+  q=(QR[0].transpose())*b;
+  R=QR[1];
+  x.resize(n);
+  x(n-1)=q(n-1)/R(n-1,n-1);
+  for(int i=n-2;i>=0;i--){
+    s=0;
+    for(int j=i+1;j<n;j++){
+      s=s+R(i,j)*x(j);
+    }
+    x(i)=(1/R(i,i))*(q(i)-s);
+  }
   
-  for(int k=0;k<m;k++){
-  if(k>0){
-  r.col(k)=
-  }
-  s=0;
-  for(int i=k;i<n;i++){
-  s=s+a(i,k)*a(i,k);
-  }
-  beta=sign(a(k,k))*sqrt(s);
-  for(int j=0;j<n;j++){
-  if(j<k){
-  z(j)=0;
-  }
-  if(j==k){
-  z(j)=beta+a(j,j);
-  }
-  if(j>k){
-  z(j)=a(j,k);
-  }
-  }
-  w=(1/sqrt(z.dot(z)))*z;
-  p=I-2*w*transpose(w);
-  r.col(k+1)=P*r.
-  
-  }
-  }*/
+  return x;
+}
+
+
 
 
