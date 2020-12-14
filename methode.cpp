@@ -13,6 +13,28 @@ using Eigen::VectorXd;
 using namespace std;
 using namespace Eigen;
 
+void removeRow(Eigen::MatrixXd& matrix, unsigned int rowToRemove)
+{
+  unsigned int numRows = matrix.rows()-1;
+  unsigned int numCols = matrix.cols();
+
+  if( rowToRemove < numRows )
+  matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.block(rowToRemove+1,0,numRows-rowToRemove,numCols);
+
+  matrix.conservativeResize(numRows,numCols);
+}
+
+void removeColumn(Eigen::MatrixXd& matrix, unsigned int colToRemove)
+{
+  unsigned int numRows = matrix.rows();
+  unsigned int numCols = matrix.cols()-1;
+
+  if( colToRemove < numCols )
+  matrix.block(0,colToRemove,numRows,numCols-colToRemove) = matrix.block(0,colToRemove+1,numRows,numCols-colToRemove);
+
+  matrix.conservativeResize(numRows,numCols);
+}
+
 
 Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic, Dynamic> Hm){
   Eigen::Matrix<double, Dynamic, Dynamic> Hm_;
@@ -245,6 +267,8 @@ Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Ma
   while ((Beta > eps) && (k<=kmax))
     {
       W=Arnoldi(r,A) ; //retourne un vecteur de deux elements Hm et Vm
+      removeRow(W[0],W[0].rows()-1);
+      removeColumn(W[1],W[1].cols()-1);
       y = cholesky_resolution((W[0].transpose())*W[0],Beta*W[0].transpose()*e1); //Moindres carrés
       X = X + W[1]*y ;
       r = Beta*e1-W[0]*y;
