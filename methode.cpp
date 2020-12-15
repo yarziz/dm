@@ -370,53 +370,51 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
 
 vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixXd A)
 {
-  int n = A.cols();
+  int n = A.rows();
+  int m = A.cols();
+  int c(0);
   double beta;
-  Eigen::Matrix<double, Dynamic, Dynamic>  H,W,Q,R,S,B,D,I;
+  Eigen::Matrix<double, Dynamic, Dynamic>  H,W,Q,Rbar,R,S,B,Hbar,I;
   VectorXd z,w,x,e;
   vector<Eigen::Matrix<double, Dynamic, Dynamic>> P,X ;
-  R = A ;
-
-  Q = MatrixXd::Identity(n,n);
-
-
-  for (int k = 0 ; k<n ; ++k)
+  R=A;
+  if (n<m)
   {
+    c=n;
+  }
+  else
+  {
+    c=m;
+  }
+  Q.resize(n,n);
+  for (int k = 0 ; k<c ; ++k)
+  {
+    H = MatrixXd::Identity(n,n);
     e.resize(n-k);
     e.setZero();
     e(0) = 1;
-    H = MatrixXd::Identity(n,n);
     I = MatrixXd::Identity(n-k,n-k);
-
     z.resize(n-k) ;
     w.resize(n-k);
     z.setZero() ;
-
-
     x = R.col(k).segment(k,n-k);
     z = x + sqrt(x.dot(x))*e ;
-
     w = (1/(sqrt(z.dot(z))))*z ;
-
-    D = I - 2*w*(w.transpose()) ;
-    if (k==0)
-    {
-      H = D ;
-    }
-    H.block(k,k,n-k,n-k) = D;
+    Hbar = I - 2*w*(w.transpose()) ;
+    Rbar = Hbar*R.block(k,k,n-k,m-k);
+    R.block(k,k,n-k,m-k) = Rbar;
+    H.block(k,k,n-k,n-k) = Hbar;
     P.push_back(H);
-    R = H*R;
   }
-  for (int i = 0 ; i<n ; ++i)
+  Q=P[0];
+  for (int i = 1 ; i<c ; ++i)
   {
     Q=Q*P[i] ;
   }
   X.push_back(Q);
   X.push_back(R);
   return X;
-
 }
-
 
 
 
