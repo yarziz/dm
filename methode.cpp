@@ -106,8 +106,9 @@ Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matr
       X += alpha*r ;
       r = r - alpha*z ;
       norm = sqrt(r.dot(r));
-      mon_flux << k+1 << " " << norm << endl;
       k += 1 ;
+      mon_flux << k+1 << " " << norm << endl;
+      
     }
   }
   else // Renvoie un message d’erreur si ce n’est pas le cas
@@ -150,8 +151,9 @@ Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, E
       X += alpha*r ;
       r = r - alpha*z ;
       norm=sqrt(r.dot(r));
-      mon_flux << k+1 << " " << norm << endl;
       k+=1;
+      mon_flux << k+1 << " " << norm << endl;
+     
     }
   }
   else // Renvoie un message d’erreur si ce n’est pas le cas
@@ -313,7 +315,6 @@ Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Ma
 Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double, Dynamic, Dynamic> A, int kmax, double epsilon){
   int n=x0.size();
   int k=0;
- 
   double alpha;
   Eigen::VectorXd r,rn,p,z,x;
   double beta=0,gamma=0;
@@ -327,24 +328,35 @@ Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Ma
   r=b-A*x0;
   p=r;
   beta=sqrt(r.dot(r));
-  while((beta>epsilon)&&(k<kmax+1)){
-    z=A*p;
-    alpha=r.dot(r)/z.dot(p);
-    x=x+alpha*p;
-    rn=r-alpha*z;
-    gamma=(rn).dot(rn)/r.dot(r);
-    p=rn+gamma*p;
-    beta=sqrt(r.dot(r));
-    k=k+1;
-    r=rn;
+  ofstream mon_flux;
+  string name_file("GradienConjugeResidu.txt");
+  mon_flux.open(name_file, ios::out);
+  if(mon_flux)
+  {
+    mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
+    while((beta>epsilon)&&(k<kmax+1)){
+      z=A*p;
+      alpha=r.dot(r)/z.dot(p);
+      x=x+alpha*p;
+      rn=r-alpha*z;
+      gamma=(rn).dot(rn)/r.dot(r);
+      p=rn+gamma*p;
+      beta=sqrt(r.dot(r));
+      k=k+1;
+      mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
+      r=rn;
+    }
   }
+  else // Renvoie un message d’erreur si ce n’est pas le cas
+  {
+    cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
+  }
+  mon_flux.close();
   if(k>kmax){
-    std::cout<<"Tolerance non atteinte: "<<beta<<std::endl; 
+    std::cout<<"Tolerance non atteinte: "<<beta<<std::endl;
   }
   return x;
 }
-
-
 Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double, Dynamic, Dynamic> A, int kmax,double epsilon){
   int n=x0.size();
   int k=0;
