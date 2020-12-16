@@ -82,7 +82,7 @@ Eigen::Matrix<double, Dynamic, Dynamic> new_matrixx(Eigen::Matrix<double, Dynami
 Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
 {
   Eigen::VectorXd z ;
-  double alpha=0;
+  double alpha=0, norm = 0;
   int n = x0.size() ;
   Eigen::VectorXd r, X ;
   A.resize(n,n) ;
@@ -91,54 +91,82 @@ Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matr
   X.resize(n) ;
   X=x0 ;
   r = b - A*x0 ;
+  norm = sqrt(r.dot(r));
   int k = 0 ;
-  while ((sqrt(r.dot(r)) > eps) && (k <= kmax))
+  ofstream mon_flux;
+  string name_file("gporesidu.txt");
+  mon_flux.open(name_file, ios::out);
+  if(mon_flux)
+  {
+    mon_flux << k+1 << " " << norm << endl;
+    while ((norm > eps) && (k <= kmax))
     {
       z = A*r ;
       alpha = (r.dot(r))/(r.dot(z));
       X += alpha*r ;
       r = r - alpha*z ;
+      norm = sqrt(r.dot(r));
+      mon_flux << k+1 << " " << norm << endl;
       k += 1 ;
     }
-
+  }
+  else // Renvoie un message d’erreur si ce n’est pas le cas
+  {
+    cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
+  }
+  mon_flux.close();
   if (k > kmax)
-    {
-      cout << "Tolerance non atteinte : " << sqrt(r.dot(r)) << endl ;
-    }
-  
+  {
+    cout << "Tolerance non atteinte : " << sqrt(r.dot(r)) << endl ;
+  }
   return X ;
-
- 
 }
+ 
+
 Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
 {
   Eigen::VectorXd z ;
-  double alpha=0;
+  double alpha=0, norm(0.);
   int n = x0.size() ;
   A.resize(n,n) ;
-  z.resize(n);  
+  z.resize(n);
   Eigen::VectorXd r, X ;
   r.resize(n);
   X.resize(n) ;
   X=x0 ;
   r = b - A*x0 ;
+  norm=sqrt(r.dot(r));
   int k = 0 ;
-  while ((sqrt(r.dot(r))>eps) && (k<=kmax))
+  ofstream mon_flux;
+  string name_file("Residuminimumresidu.txt");
+  mon_flux.open(name_file, ios::out);
+  if(mon_flux)
+  {
+    mon_flux << k+1 << " " << norm << endl;
+    while ((norm>eps) && (k<=kmax))
     {
       z = A*r ;
       alpha = (r.dot(z))/(z.dot(z)) ;
       X += alpha*r ;
       r = r - alpha*z ;
+      norm=sqrt(r.dot(r));
+      mon_flux << k+1 << " " << norm << endl;
       k+=1;
     }
+  }
+  else // Renvoie un message d’erreur si ce n’est pas le cas
+  {
+    cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
+  }
+  mon_flux.close();
 
   if (k > kmax)
-    {
-      cout << "Tolerance non atteinte : " << sqrt(r.dot(r)) << endl ;
-    }
+  {
+    cout << "Tolerance non atteinte : " << sqrt(r.dot(r)) << endl ;
+  }
   return X ;
-  
 }
+
 
 
 
