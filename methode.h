@@ -19,4 +19,6 @@ Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Ma
 Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> A, double eps);
 Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> A, int kmax,double epsilon);
 std::vector<Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>>  qr_decomposition(Eigen::MatrixXd A);
-Eigen::VectorXd qr_resolution(Eigen::MatrixXd A, Eigen::VectorXd b);
+Eigen::VectorXd qr_resolution_fom(Eigen::MatrixXd A, Eigen::VectorXd b);
+Eigen::VectorXd romove_vector(Eigen::VectorXd b);
+Eigen::VectorXd resolution_Gm(Eigen::MatrixXd R, Eigen::VectorXd q);

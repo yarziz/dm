@@ -35,6 +35,15 @@ void removeColumn(Eigen::MatrixXd& matrix, unsigned int colToRemove)
   matrix.conservativeResize(numRows,numCols);
 }
 
+Eigen::VectorXd romove_vector(Eigen::VectorXd b){
+  int n=b.rows();
+  VectorXd z;
+  z=b;
+  z.resize(n-1);
+  return z;
+}
+
+
 
 Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic, Dynamic> Hm){
   Eigen::Matrix<double, Dynamic, Dynamic> Hm_;
@@ -43,7 +52,7 @@ Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic
   m=Hm.cols();
   
   if(n==m+1){
-    cout<<"ok"<<endl;
+    // cout<<"ok"<<endl;
   }
   Hm_.resize(m,m);
   for(int k=0;k<n-1;k++){
@@ -66,7 +75,7 @@ Eigen::Matrix<double, Dynamic, Dynamic> new_matrixx(Eigen::Matrix<double, Dynami
   m=Hm.cols();
   
   if(n==m-1){
-    cout<<"ok"<<endl;
+    // cout<<"ok"<<endl;
   }
   Hm_.resize(n,n);
   for(int k=0;k<m-1;k++){
@@ -279,12 +288,20 @@ Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Ma
 {
   int n = x0.size() ;
   A.resize(n,n) ;
-  Eigen::VectorXd r, X, e1,y ;
-  vector<Eigen::Matrix<double, Dynamic, Dynamic>> W;
+  Eigen::VectorXd r, X, e1,y,q,qq ;
+  vector<Eigen::Matrix<double, Dynamic, Dynamic>> W,WW;
+  Eigen::Matrix<double, Dynamic, Dynamic> Q,R,Vm,Rm;
+  double g=0;
   r.resize(n);
   X.resize(n) ;
-  e1.resize(n) ;
-  for (int i=1 ; i<n ; ++i)
+  e1.resize(n+1) ;
+  Q.resize(n+1,n+1);
+  R.resize(n+1,n);
+  Rm.resize(n,n);
+  Vm.resize(n,n);
+  qq.resize(n);
+  q.resize(n+1);
+  for (int i=1 ; i<n+1 ; ++i)
     {
       e1(i)=0;
     }
@@ -297,12 +314,21 @@ Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Ma
   while ((Beta > eps) && (k<=kmax))
     {
       W=Arnoldi(r,A) ; //retourne un vecteur de deux elements Hm et Vm
-      removeRow(W[0],W[0].rows()-1);
-      removeColumn(W[1],W[1].cols()-1);
-      y = cholesky_resolution((W[0].transpose())*W[0],Beta*W[0].transpose()*e1); //Moindres carrés
-      X = X + W[1]*y ;
-      r = Beta*e1-W[0]*y;
-      Beta = sqrt(r.dot(r)) ;
+      WW=qr_decomposition(W[0]);
+      Q=WW[0];
+      R=WW[1];
+      q=Beta*(Q.transpose()*e1);
+      g=q(n);
+      Rm=new_matrix(R);
+      qq=romove_vector(q);
+      y=resolution_Gm(Rm,qq);
+      //removeRow(W[0],W[0].rows()-1);
+      //removeColumn(W[1],W[1].cols()-1);
+      //y = cholesky_resolution((W[0].transpose())*W[0],Beta*W[0].transpose()*e1); //Moindres carrés
+      Vm=new_matrixx(W[1]);
+      X = X + Vm*y ;
+      r = Beta*W[1]*((Q.transpose()).col(n));
+      Beta = sqrt(r.dot(r));
       k += 1 ;
     }
   if (k > kmax)
@@ -391,7 +417,7 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
     W0=new_matrix(W[0]);
     W1=new_matrixx(W[1]);
     //y=cholesky_resolution(W0,beta*e1);
-    y=qr_resolution(W0,beta*e1);
+    y=qr_resolution_fom(W0,beta*e1);
       //cout<<y<<endl;
     x=x+W1*y;
     r=-W[0](n,n-1)*y(n-1)*(W[1].col(n));
@@ -416,7 +442,7 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixX
   double beta;
   Eigen::Matrix<double, Dynamic, Dynamic>  H,W,Q,Rbar,R,S,B,Hbar,I;
   VectorXd z,w,x,e;
-  vector<Eigen::Matrix<double, Dynamic, Dynamic>> P,X ;
+  vector<Eigen::Matrix<double, Dynamic, Dynamic>> P, X ;
   R=A;
   if (n<m)
   {
@@ -468,7 +494,7 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixX
 
 
 
-Eigen::VectorXd qr_resolution(Eigen::MatrixXd A, Eigen::VectorXd b)
+Eigen::VectorXd qr_resolution_fom(Eigen::MatrixXd A, Eigen::VectorXd b)
 {
   vector<Eigen::Matrix<double, Dynamic, Dynamic>> QR;
   //Eigen::Matrix<double, Dynamic, Dynamic> Q;
@@ -493,10 +519,25 @@ Eigen::VectorXd qr_resolution(Eigen::MatrixXd A, Eigen::VectorXd b)
     }
     x(i)=(1/R(i,i))*(q(i)-s);
   }
-  
   return x;
+
 }
 
 
 
 
+Eigen::VectorXd resolution_Gm(Eigen::MatrixXd R, Eigen::VectorXd q){
+  Eigen::VectorXd x;
+  int n = R.cols();
+  double s;
+  x.resize(n);
+  x(n-1)=q(n-1)/R(n-1,n-1);
+  for(int i=n-2;i>=0;i--){
+    s=0;
+    for(int j=i+1;j<n;j++){
+      s=s+R(i,j)*x(j);
+    }
+    x(i)=(1/R(i,i))*(q(i)-s);
+  }
+  return x;
+}

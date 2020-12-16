@@ -78,7 +78,7 @@ Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
 int main(){
   int n;
   int kmax=100000;
-  double eps=0.0001;
+  double eps=0.00001;
   Eigen::Matrix<double, Dynamic, Dynamic> a;
   Eigen::VectorXd b,x0,x;
   cout<<"donner n"<<endl;
@@ -91,17 +91,18 @@ int main(){
   x0(0)=1;
   a=gene_matrice(n);
   a=gene_matrice_tri(a,n);
-  
+  x= GMRes(x0,b,kmax,a,eps);
   //x=GPO(x0,b,kmax,a,eps);
   //x=Residuminimum(x0,b,kmax,a,eps);
   //x=GradienConjugue(x0,b,a,kmax,eps);
   
-  x=FOM(x0,b,a,kmax,eps);
+  //x=FOM(x0,b,a,kmax,eps);
   //cout<<"--------------------------"<<endl;
-  cout<<x<<endl;
+  //cout<<x<<endl;
   //cout<<"--------------------------"<<endl;
   //cout<<a*x<<endl;
   cout<<"--------------------------"<<endl;
+  //cout<<b.resize(n-2)<<endl;
   cout<<(a*x-b).maxCoeff()<<endl;
   //cout<<Arnoldi(b-a*x0,a)[0]<<endl;
   //cout<<cholesky_resolution(a,b)<<endl;
