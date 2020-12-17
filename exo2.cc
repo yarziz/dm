@@ -78,7 +78,7 @@ Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
 int main(){
   int n;
   int kmax=100000;
-  double eps=0.00001;
+  double eps=0.0000001;
   Eigen::Matrix<double, Dynamic, Dynamic> a;
   Eigen::VectorXd b,x0,x;
   cout<<"donner n"<<endl;

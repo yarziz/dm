@@ -19,7 +19,7 @@ void removeRow(Eigen::MatrixXd& matrix, unsigned int rowToRemove)
   unsigned int numCols = matrix.cols();
 
   if( rowToRemove < numRows )
-  matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.block(rowToRemove+1,0,numRows-rowToRemove,numCols);
+    matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.block(rowToRemove+1,0,numRows-rowToRemove,numCols);
 
   matrix.conservativeResize(numRows,numCols);
 }
@@ -30,7 +30,7 @@ void removeColumn(Eigen::MatrixXd& matrix, unsigned int colToRemove)
   unsigned int numCols = matrix.cols()-1;
 
   if( colToRemove < numCols )
-  matrix.block(0,colToRemove,numRows,numCols-colToRemove) = matrix.block(0,colToRemove+1,numRows,numCols-colToRemove);
+    matrix.block(0,colToRemove,numRows,numCols-colToRemove) = matrix.block(0,colToRemove+1,numRows,numCols-colToRemove);
 
   matrix.conservativeResize(numRows,numCols);
 }
@@ -50,7 +50,7 @@ Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic
   int n(0),m(0);
   n=Hm.rows();
   m=Hm.cols();
-  
+  Hm_.resize(m,m);
   if(n==m+1){
     // cout<<"ok"<<endl;
   }
@@ -59,12 +59,12 @@ Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic
     Hm_.row(k)=Hm.row(k);
   }
  
-  
-  for(int i=0;i<m-2;i++){
+  /*
+    for(int i=0;i<m-2;i++){
     for(int j=2+i;j<m;j++){
-      Hm_(i,j)=0;
+    Hm_(i,j)=0;
     }
-  }
+    }*/
   return Hm_;
 }
 
@@ -106,29 +106,29 @@ Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matr
   string name_file("gporesidu.txt");
   mon_flux.open(name_file, ios::out);
   if(mon_flux)
-  {
-    mon_flux << k+1 << " " << norm << endl;
-    while ((norm > eps) && (k <= kmax))
     {
-      z = A*r ;
-      alpha = (r.dot(r))/(r.dot(z));
-      X += alpha*r ;
-      r = r - alpha*z ;
-      norm = sqrt(r.dot(r));
-      k += 1 ;
       mon_flux << k+1 << " " << norm << endl;
+      while ((norm > eps) && (k <= kmax))
+	{
+	  z = A*r ;
+	  alpha = (r.dot(r))/(r.dot(z));
+	  X += alpha*r ;
+	  r = r - alpha*z ;
+	  norm = sqrt(r.dot(r));
+	  k += 1 ;
+	  mon_flux << k+1 << " " << norm << endl;
       
+	}
     }
-  }
   else // Renvoie un message d’erreur si ce n’est pas le cas
-  {
-    cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
-  }
+    {
+      cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
+    }
   mon_flux.close();
   if (k > kmax)
-  {
-    cout << "Tolerance non atteinte : " << sqrt(r.dot(r)) << endl ;
-  }
+    {
+      cout << "Tolerance non atteinte : " << sqrt(r.dot(r)) << endl ;
+    }
   return X ;
 }
  
@@ -151,30 +151,30 @@ Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, E
   string name_file("Residuminimumresidu.txt");
   mon_flux.open(name_file, ios::out);
   if(mon_flux)
-  {
-    mon_flux << k+1 << " " << norm << endl;
-    while ((norm>eps) && (k<=kmax))
     {
-      z = A*r ;
-      alpha = (r.dot(z))/(z.dot(z)) ;
-      X += alpha*r ;
-      r = r - alpha*z ;
-      norm=sqrt(r.dot(r));
-      k+=1;
       mon_flux << k+1 << " " << norm << endl;
+      while ((norm>eps) && (k<=kmax))
+	{
+	  z = A*r ;
+	  alpha = (r.dot(z))/(z.dot(z)) ;
+	  X += alpha*r ;
+	  r = r - alpha*z ;
+	  norm=sqrt(r.dot(r));
+	  k+=1;
+	  mon_flux << k+1 << " " << norm << endl;
      
+	}
     }
-  }
   else // Renvoie un message d’erreur si ce n’est pas le cas
-  {
-    cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
-  }
+    {
+      cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
+    }
   mon_flux.close();
 
   if (k > kmax)
-  {
-    cout << "Tolerance non atteinte : " << sqrt(r.dot(r)) << endl ;
-  }
+    {
+      cout << "Tolerance non atteinte : " << sqrt(r.dot(r)) << endl ;
+    }
   return X ;
 }
 
@@ -276,7 +276,7 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>> Arnoldi(Eigen::VectorXd r, Eigen
 	{
 	  break;
 	}
-      Vm.col(j+1) = (1/Hm(j+1,j))*z;
+      Vm.col(j+1) = (1./(Hm(j+1,j)*1.))*z;
     }
   X.push_back(Hm);
   X.push_back(Vm);
@@ -286,50 +286,85 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>> Arnoldi(Eigen::VectorXd r, Eigen
 
 Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
 {
+  double Beta=0;
   int n = x0.size() ;
   A.resize(n,n) ;
-  Eigen::VectorXd r, X, e1,y,q,qq ;
+  Eigen::VectorXd r, X, e1,en,y,q,qq ;
   vector<Eigen::Matrix<double, Dynamic, Dynamic>> W,WW;
   Eigen::Matrix<double, Dynamic, Dynamic> Q,R,Vm,Rm;
   double g=0;
+  b.resize(n);
   r.resize(n);
   X.resize(n) ;
   e1.resize(n+1) ;
+  en.resize(n+1);
   Q.resize(n+1,n+1);
   R.resize(n+1,n);
   Rm.resize(n,n);
   Vm.resize(n,n);
   qq.resize(n);
   q.resize(n+1);
-  for (int i=1 ; i<n+1 ; ++i)
+  for (int i=0 ; i<n+1 ; ++i)
     {
       e1(i)=0;
+      en(i)=0;
     }
-
+  Q.setZero();
+  R.setZero();
+  Rm.setZero();
+  Vm.setZero();
   e1(0)=1;
+  en(n)=1;
   X=x0 ;
-  r = b - A*x0 ;
-  double Beta = sqrt(r.dot(r)) ;
+  r = b-A*X ;
+  Beta = sqrt(r.dot(r)) ;
   int k = 0;
-  while ((Beta > eps) && (k<=kmax))
+  ofstream mon_flux;
+  string name_file("Gmres.txt");
+  mon_flux.open(name_file, ios::out);
+  if(mon_flux)
     {
-      W=Arnoldi(r,A) ; //retourne un vecteur de deux elements Hm et Vm
-      WW=qr_decomposition(W[0]);
-      Q=WW[0];
-      R=WW[1];
-      q=Beta*(Q.transpose()*e1);
-      g=q(n);
-      Rm=new_matrix(R);
-      qq=romove_vector(q);
-      y=resolution_Gm(Rm,qq);
-      //removeRow(W[0],W[0].rows()-1);
-      //removeColumn(W[1],W[1].cols()-1);
-      //y = cholesky_resolution((W[0].transpose())*W[0],Beta*W[0].transpose()*e1); //Moindres carrés
-      Vm=new_matrixx(W[1]);
-      X = X + Vm*y ;
-      r = Beta*W[1]*((Q.transpose()).col(n));
-      Beta = sqrt(r.dot(r));
-      k += 1 ;
+      mon_flux << k+1 << " " << Beta << endl;
+      while ((Beta > eps) && (k<=kmax))
+	{
+      
+	  W=Arnoldi(r,A) ; //retourne un vecteur de deux elements Hm et Vm
+	  WW=qr_decomposition(W[0]);
+	  Q=WW[0];
+	  R=WW[1];
+	  //cout<<(W[0]-Q*R).maxCoeff()<<endl;
+	  //q=Beta*((Q.transpose())*e1);
+	  g=q(n);
+	  Rm=new_matrix(R);
+	  if(k==0){
+	    //	cout<<Rm<<endl;
+	    // cout<<(W[0].transpose())*W[0]<<endl;
+	  }
+	  //qq=romove_vector(q);
+	  qq=Beta*(W[0].transpose())*e1;
+	  //y=resolution_Gm(Rm,qq);
+	  y=cholesky_resolution((W[0].transpose())*W[0],qq);
+	  //cout<<(Rm*y-qq).maxCoeff()<<endl;
+	  //removeRow(W[0],W[0].rows()-1);
+	  //removeColumn(W[1],W[1].cols()-1);
+	  //y = cholesky_resolution((W[0].transpose())*W[0],Beta*W[0].transpose()*e1); //Moindres carrés
+	  //g=(q-R*y).dot(q-R*y);
+	  //g=sqrt(g);
+	  Vm=new_matrixx(W[1]);
+	  X=X+Vm*y ;
+	  //g=g-(R.row(n)).dot(y);
+	  //r= g*W[1]*((Q.transpose())*en);
+	  r=b-A*X;
+	  //r=Beta*e1-W[0]*y;
+	  //r=b-A*X;
+	  Beta =sqrt(r.dot(r)) ;
+	  //Beta=sqrt( (Beta*e1-W[0]*y).dot(Beta*e1-W[0]*y));
+	  //Beta=g;
+	  //cout<<Beta<<endl;
+	  cout<<k<<endl;
+	  mon_flux << k+1 << " " << Beta << endl;
+	  k += 1 ;
+	}
     }
   if (k > kmax)
     {
@@ -358,25 +393,25 @@ Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Ma
   string name_file("GradienConjugeResidu.txt");
   mon_flux.open(name_file, ios::out);
   if(mon_flux)
-  {
-    mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
-    while((beta>epsilon)&&(k<kmax+1)){
-      z=A*p;
-      alpha=r.dot(r)/z.dot(p);
-      x=x+alpha*p;
-      rn=r-alpha*z;
-      gamma=(rn).dot(rn)/r.dot(r);
-      p=rn+gamma*p;
-      beta=sqrt(r.dot(r));
-      k=k+1;
+    {
       mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
-      r=rn;
+      while((beta>epsilon)&&(k<kmax+1)){
+	z=A*p;
+	alpha=r.dot(r)/z.dot(p);
+	x=x+alpha*p;
+	rn=r-alpha*z;
+	gamma=(rn).dot(rn)/r.dot(r);
+	p=rn+gamma*p;
+	beta=sqrt(r.dot(r));
+	k=k+1;
+	mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
+	r=rn;
+      }
     }
-  }
   else // Renvoie un message d’erreur si ce n’est pas le cas
-  {
-    cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
-  }
+    {
+      cout << "ERREUR: Impossible d’ouvrir le fichier." << endl;
+    }
   mon_flux.close();
   if(k>kmax){
     std::cout<<"Tolerance non atteinte: "<<beta<<std::endl;
@@ -411,20 +446,28 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
 
   e1(0)=1;
 
-
-  while((beta>epsilon)&&(k<kmax+1)){
-    W=Arnoldi(r,A);
-    W0=new_matrix(W[0]);
-    W1=new_matrixx(W[1]);
-    //y=cholesky_resolution(W0,beta*e1);
-    y=qr_resolution_fom(W0,beta*e1);
-      //cout<<y<<endl;
-    x=x+W1*y;
-    r=-W[0](n,n-1)*y(n-1)*(W[1].col(n));
-    beta=sqrt(r.dot(r));
-    k=k+1;
-  }
-  
+  ofstream mon_flux;
+  string name_file("Fom.txt");
+  mon_flux.open(name_file, ios::out);
+  if(mon_flux)
+    {
+      mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
+      while((beta>epsilon)&&(k<kmax+1)){
+	W=Arnoldi(r,A);
+	W0=new_matrix(W[0]);
+	W1=new_matrixx(W[1]);
+	//y=cholesky_resolution(W0,beta*e1);
+	y=qr_resolution_fom(W0,beta*e1);
+	//cout<<y<<endl;
+	x=x+W1*y;
+	r=-W[0](n,n-1)*y(n-1)*(W[1].col(n));
+	beta=sqrt(r.dot(r));
+	mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
+	k=k+1;
+    
+      }
+    }
+  mon_flux.close();
   return x;
 }
 
@@ -445,38 +488,38 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixX
   vector<Eigen::Matrix<double, Dynamic, Dynamic>> P, X ;
   R=A;
   if (n<m)
-  {
-    c=n;
-  }
+    {
+      c=n;
+    }
   else
-  {
-    c=m;
-  }
+    {
+      c=m;
+    }
   Q.resize(n,n);
   for (int k = 0 ; k<c ; ++k)
-  {
-    H = MatrixXd::Identity(n,n);
-    e.resize(n-k);
-    e.setZero();
-    e(0) = 1;
-    I = MatrixXd::Identity(n-k,n-k);
-    z.resize(n-k) ;
-    w.resize(n-k);
-    z.setZero() ;
-    x = R.col(k).segment(k,n-k);
-    z = x + sqrt(x.dot(x))*e ;
-    w = (1/(sqrt(z.dot(z))))*z ;
-    Hbar = I - 2*w*(w.transpose()) ;
-    Rbar = Hbar*R.block(k,k,n-k,m-k);
-    R.block(k,k,n-k,m-k) = Rbar;
-    H.block(k,k,n-k,n-k) = Hbar;
-    P.push_back(H);
-  }
+    {
+      H = MatrixXd::Identity(n,n);
+      e.resize(n-k);
+      e.setZero();
+      e(0) = 1;
+      I = MatrixXd::Identity(n-k,n-k);
+      z.resize(n-k) ;
+      w.resize(n-k);
+      z.setZero() ;
+      x = R.col(k).segment(k,n-k);
+      z = x + sqrt(x.dot(x))*e ;
+      w = (1/(sqrt(z.dot(z))))*z ;
+      Hbar = I - 2*w*(w.transpose()) ;
+      Rbar = Hbar*R.block(k,k,n-k,m-k);
+      R.block(k,k,n-k,m-k) = Rbar;
+      H.block(k,k,n-k,n-k) = Hbar;
+      P.push_back(H);
+    }
   Q=P[0];
   for (int i = 1 ; i<c ; ++i)
-  {
-    Q=Q*P[i] ;
-  }
+    {
+      Q=Q*P[i] ;
+    }
   X.push_back(Q);
   X.push_back(R);
   return X;
