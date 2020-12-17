@@ -43,6 +43,21 @@ Eigen::VectorXd romove_vector(Eigen::VectorXd b){
   return z;
 }
 
+Eigen::MatrixXd cholesky_tri(Eigen::MatrixXd A){
+  int n = A.rows() ;
+  Eigen::MatrixXd L ;
+  L.resize(n,n);
+  L(0,0)= sqrt(A(0,0));
+  L(1,0)= A(1,0)/L(0,0) ;
+  for (int i = 1 ; i<n-1 ; ++i)
+  {
+    L(i,i)=sqrt(A(i,i)-(L(i,i-1)*L(i,i-1)));
+    L(i+1,i)=A(i+1,i)/L(i,i);
+  }
+  L(n-1,n-1) = sqrt(A(n-1,n-1)-(L(n-1,n-2)*L(n-1,n-2)));
+  return L;
+}
+
 
 
 Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic, Dynamic> Hm){
