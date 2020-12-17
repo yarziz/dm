@@ -58,6 +58,26 @@ Eigen::MatrixXd cholesky_tri(Eigen::MatrixXd A){
   return L;
 }
 
+Eigen::VectorXd cholesky_tri_resol(Eigen::MatrixXd A, Eigen::VectorXd b)
+{
+  Eigen::VectorXd X, Y ;
+  Eigen::MatrixXd L;
+  int n = A.cols();
+  X.resize(n);
+  Y.resize(n);
+  L = cholesky_tri(A);
+  Y(0) = b(0)/L(0,0);
+  for (int i = 1 ; i<n ; ++i)
+  {
+    Y(i) = (1./L(i,i))*(b(i) - Y(i-1)*L(i,i-1));
+  }
+  X(n-1) = Y(n-1)/L(n-1,n-1);
+  for (int j = n-2 ; j>-1 ; --j )
+  {
+    X(j)=(1/L(j,j))*(Y(j)-X(j+1)*L(j+1,j));
+  }
+  return X;
+}
 
 
 Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic, Dynamic> Hm){
