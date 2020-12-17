@@ -348,16 +348,16 @@ Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Ma
       mon_flux << k+1 << " " << Beta << endl;
       while ((Beta > eps) && (k<=kmax))
 	{
-	  W=Arnoldi(r,A) ; //retourne un vecteur de deux elements Hm et Vm
-	  WW=qr_decomposition(W[0]);
+	  W=Arnoldi(r,A) ; //retourne un vecteur de deux elements Hm et Vm+1
+	  WW=qr_decomposition(W[0]);//contient (Q,R)
 	  Q=WW[0];
 	  R=WW[1];
 	  q=Beta*((Q.transpose()).col(0));
 	  g=q(n);
-	  Rm=new_matrix(R);
-	  qq=romove_vector(q);
+	  Rm=new_matrix(R);//R sans la derniere ligne
+	  qq=romove_vector(q);//q sans le dernier élément
 	  y=resolution_Gm(Rm,qq);
-	  Vm=new_matrixx(W[1]);
+	  Vm=new_matrixx(W[1]);//Vm+1 sans dernière cologne
 	  X=X+Vm*y ;
 	  r= g*W[1]*((Q.transpose()).col(n));
 	  Beta=g;
@@ -441,6 +441,7 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
   r=b-A*x0;
   beta=sqrt(r.dot(r));
   e1.resize(n) ;
+  //construire le vecteur unitaire e1
   for (int i=0 ; i<n ; ++i)
     {
       e1(i)=0;
@@ -456,15 +457,15 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
       mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
       while((beta>epsilon)&&(k<kmax+1)){
 	W=Arnoldi(r,A);
-	W0=new_matrix(W[0]);
-	W1=new_matrixx(W[1]);
+	W0=new_matrix(W[0]);//contient Hm
+	W1=new_matrixx(W[1]);//contient Vm
 	//y=cholesky_resolution(W0,beta*e1);
 	y=qr_resolution_fom(W0,beta*e1);
 	//cout<<y<<endl;
 	x=x+W1*y;
 	r=-W[0](n,n-1)*y(n-1)*(W[1].col(n));
 	beta=sqrt(r.dot(r));
-	mon_flux << k+1 << " " << sqrt((b-A*x).dot((b-A*x))) << endl;
+	mon_flux << k+1 << " " << beta << endl;
 	k=k+1;
     
       }
@@ -477,8 +478,7 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
 
 
 //----------------------------------------------------------------------------------------------------------//
-
-
+//fonction qr_decomposition prend une matrice A et donne sa décomposition par householder
 vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixXd A)
 {
   int n = A.rows();
@@ -529,7 +529,7 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixX
 
 
 //----------------------------------------------------------------------------------------------------//
-
+//fonction qui résoudre le système Ax=b avec A=QR Q et R sont obtenues par qr_decomposition.
 Eigen::VectorXd qr_resolution_fom(Eigen::MatrixXd A, Eigen::VectorXd b)
 {
   vector<Eigen::Matrix<double, Dynamic, Dynamic>> QR;
@@ -560,7 +560,7 @@ Eigen::VectorXd qr_resolution_fom(Eigen::MatrixXd A, Eigen::VectorXd b)
 }
 
 //-----------------------------------------------------------------------------------------------//
-
+//fonction qui résoudre un système Ax=b avec A triangulaire superieur (utiliser en gmres)
 Eigen::VectorXd resolution_Gm(Eigen::MatrixXd R, Eigen::VectorXd q){
   Eigen::VectorXd x;
   int n = R.cols();
