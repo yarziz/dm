@@ -13,7 +13,7 @@ using namespace Eigen;
 
 
 
-
+//somme est une fonction qui calcule alpha de la question 2
 double somme(Matrix<double,Dynamic,Dynamic> a,int n){
   double ligne=0.;
   double max=0.;
@@ -29,14 +29,16 @@ double somme(Matrix<double,Dynamic,Dynamic> a,int n){
   return max;
 }
 
+//------------------------------------------------------------------------------------//
 
+//gene_matrice_tri est une fonction qui donne une matrice symétrique tridiagonal définie positive
 Matrix<double,Dynamic,Dynamic> gene_matrice_tri(Matrix<double,Dynamic,Dynamic> a,int n){
   Matrix<double,Dynamic,Dynamic> tri; 
   a.resize(n,n);
   tri.resize(n,n);
   tri.setZero();
   for(int j=0;j<n;j++){
-    tri(j,j)=a(j,j);
+    tri(j,j)=a(j,j)+pow(n,5);
   }
 
   for(int i=0;i<n-1;i++){
@@ -46,7 +48,9 @@ Matrix<double,Dynamic,Dynamic> gene_matrice_tri(Matrix<double,Dynamic,Dynamic> a
   return tri;
 }
 
+//-----------------------------------------------------------------------------------------//
 
+//gene_matrice est la fonction qui qui donne la matrice aléatoire de taille n*n
 Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
   Matrix<double,Dynamic,Dynamic> b;
   Matrix<double,Dynamic,Dynamic> b_bt;
@@ -72,40 +76,41 @@ Matrix<double,Dynamic,Dynamic> gene_matrice(int n){
 
 
 
-
+//----------------------------------------------------------------------//
+//----------------------------------------------------------------------//
 
 
 int main(){
   int n;
   int kmax=100000;
-  double eps=0.0000001;
+  double eps=0.00000001;
   Eigen::Matrix<double, Dynamic, Dynamic> a;
   Eigen::VectorXd b,x0,x;
   cout<<"donner n"<<endl;
   cin>>n;
   b.resize(n);
   x0.resize(n);
+  //vecteur b de la question 2
   for(int i=0;i<n;i++){
     b(i)=1;
   }
+  //x initiale
   x0(0)=1;
+  
   a=gene_matrice(n);
-  a=gene_matrice_tri(a,n);
   x= GMRes(x0,b,kmax,a,eps);
   //x=GPO(x0,b,kmax,a,eps);
   //x=Residuminimum(x0,b,kmax,a,eps);
   //x=GradienConjugue(x0,b,a,kmax,eps);
-  
   //x=FOM(x0,b,a,kmax,eps);
   //cout<<"--------------------------"<<endl;
-  //cout<<x<<endl;
+  //cout<<b<<endl;
   //cout<<"--------------------------"<<endl;
-  //cout<<a*x<<endl;
+  //cout<<romove_vector(b)<<endl;
   cout<<"--------------------------"<<endl;
-  //cout<<b.resize(n-2)<<endl;
   cout<<(a*x-b).maxCoeff()<<endl;
-  //cout<<Arnoldi(b-a*x0,a)[0]<<endl;
-  //cout<<cholesky_resolution(a,b)<<endl;
+  
+  
  
  
   return 0;

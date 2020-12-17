@@ -13,35 +13,18 @@ using Eigen::VectorXd;
 using namespace std;
 using namespace Eigen;
 
-void removeRow(Eigen::MatrixXd& matrix, unsigned int rowToRemove)
-{
-  unsigned int numRows = matrix.rows()-1;
-  unsigned int numCols = matrix.cols();
-
-  if( rowToRemove < numRows )
-    matrix.block(rowToRemove,0,numRows-rowToRemove,numCols) = matrix.block(rowToRemove+1,0,numRows-rowToRemove,numCols);
-
-  matrix.conservativeResize(numRows,numCols);
-}
-
-void removeColumn(Eigen::MatrixXd& matrix, unsigned int colToRemove)
-{
-  unsigned int numRows = matrix.rows();
-  unsigned int numCols = matrix.cols()-1;
-
-  if( colToRemove < numCols )
-    matrix.block(0,colToRemove,numRows,numCols-colToRemove) = matrix.block(0,colToRemove+1,numRows,numCols-colToRemove);
-
-  matrix.conservativeResize(numRows,numCols);
-}
-
+//romove_vector: donne le vecteur b sans le dernier élément
 Eigen::VectorXd romove_vector(Eigen::VectorXd b){
   int n=b.rows();
   VectorXd z;
-  z=b;
   z.resize(n-1);
+  for(int i=0;i<n-1;i++){
+    z(i)=b(i);
+  }
   return z;
 }
+
+//-------------------------------------------------------------------------------//
 
 Eigen::MatrixXd cholesky_tri(Eigen::MatrixXd A){
   int n = A.rows() ;
@@ -57,6 +40,8 @@ Eigen::MatrixXd cholesky_tri(Eigen::MatrixXd A){
   L(n-1,n-1) = sqrt(A(n-1,n-1)-(L(n-1,n-2)*L(n-1,n-2)));
   return L;
 }
+
+//------------------------------------------------------------------------------//
 
 Eigen::VectorXd cholesky_tri_resol(Eigen::MatrixXd A, Eigen::VectorXd b)
 {
@@ -80,6 +65,9 @@ Eigen::VectorXd cholesky_tri_resol(Eigen::MatrixXd A, Eigen::VectorXd b)
 }
 
 
+//------------------------------------------------------------------------------------------------//
+
+//new_matrix:donne la matrice Hm sans la dernière ligne
 Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic, Dynamic> Hm){
   Eigen::Matrix<double, Dynamic, Dynamic> Hm_;
   int n(0),m(0);
@@ -103,6 +91,9 @@ Eigen::Matrix<double, Dynamic, Dynamic> new_matrix(Eigen::Matrix<double, Dynamic
   return Hm_;
 }
 
+//------------------------------------------------------------------------------------------------//
+
+//new_matrix:donne la matrice Hm sans la dernière cologne
 Eigen::Matrix<double, Dynamic, Dynamic> new_matrixx(Eigen::Matrix<double, Dynamic, Dynamic> Hm){
   Eigen::Matrix<double, Dynamic, Dynamic> Hm_;
   int n(0),m(0);
@@ -120,7 +111,7 @@ Eigen::Matrix<double, Dynamic, Dynamic> new_matrixx(Eigen::Matrix<double, Dynami
 }
 
 
-
+//-----------------------------------------------------------------------------------------------//
 
 
 Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
@@ -167,6 +158,7 @@ Eigen::VectorXd GPO(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matr
   return X ;
 }
  
+//-----------------------------------------------------------------------------------------------------------------//
 
 Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
 {
@@ -213,7 +205,7 @@ Eigen::VectorXd Residuminimum(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, E
   return X ;
 }
 
-
+//-----------------------------------------------------------------------------------------------------------------//
 
 
 Eigen::MatrixXd cholesky_decomposition(Eigen::MatrixXd A)
@@ -276,6 +268,7 @@ Eigen::VectorXd cholesky_resolution(Eigen::MatrixXd A, Eigen::VectorXd b)
     }
   return x;
 }
+//-----------------------------------------------------------------------------------------------------------------------//
 
 vector<Eigen::Matrix<double, Dynamic, Dynamic>> Arnoldi(Eigen::VectorXd r, Eigen::Matrix<double, Dynamic, Dynamic> A)
 {
@@ -319,37 +312,30 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>> Arnoldi(Eigen::VectorXd r, Eigen
   return X;
 }
 
+//------------------------------------------------------------------------------------------------------------------------//
+
 Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Matrix<double, Dynamic, Dynamic> A, double eps)
 {
   double Beta=0;
   int n = x0.size() ;
   A.resize(n,n) ;
-  Eigen::VectorXd r, X, e1,en,y,q,qq ;
+  Eigen::VectorXd r, X,y,q,qq ;
   vector<Eigen::Matrix<double, Dynamic, Dynamic>> W,WW;
   Eigen::Matrix<double, Dynamic, Dynamic> Q,R,Vm,Rm;
   double g=0;
   b.resize(n);
   r.resize(n);
-  X.resize(n) ;
-  e1.resize(n+1) ;
-  en.resize(n+1);
+  X.resize(n);
   Q.resize(n+1,n+1);
   R.resize(n+1,n);
   Rm.resize(n,n);
   Vm.resize(n,n);
   qq.resize(n);
   q.resize(n+1);
-  for (int i=0 ; i<n+1 ; ++i)
-    {
-      e1(i)=0;
-      en(i)=0;
-    }
   Q.setZero();
   R.setZero();
   Rm.setZero();
   Vm.setZero();
-  e1(0)=1;
-  en(n)=1;
   X=x0 ;
   r = b-A*X ;
   Beta = sqrt(r.dot(r)) ;
@@ -362,41 +348,19 @@ Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Ma
       mon_flux << k+1 << " " << Beta << endl;
       while ((Beta > eps) && (k<=kmax))
 	{
-      
 	  W=Arnoldi(r,A) ; //retourne un vecteur de deux elements Hm et Vm
 	  WW=qr_decomposition(W[0]);
 	  Q=WW[0];
 	  R=WW[1];
-	  //cout<<(W[0]-Q*R).maxCoeff()<<endl;
-	  //q=Beta*((Q.transpose())*e1);
+	  q=Beta*((Q.transpose()).col(0));
 	  g=q(n);
 	  Rm=new_matrix(R);
-	  if(k==0){
-	    //	cout<<Rm<<endl;
-	    // cout<<(W[0].transpose())*W[0]<<endl;
-	  }
-	  //qq=romove_vector(q);
-	  qq=Beta*(W[0].transpose())*e1;
-	  //y=resolution_Gm(Rm,qq);
-	  y=cholesky_resolution((W[0].transpose())*W[0],qq);
-	  //cout<<(Rm*y-qq).maxCoeff()<<endl;
-	  //removeRow(W[0],W[0].rows()-1);
-	  //removeColumn(W[1],W[1].cols()-1);
-	  //y = cholesky_resolution((W[0].transpose())*W[0],Beta*W[0].transpose()*e1); //Moindres carrés
-	  //g=(q-R*y).dot(q-R*y);
-	  //g=sqrt(g);
+	  qq=romove_vector(q);
+	  y=resolution_Gm(Rm,qq);
 	  Vm=new_matrixx(W[1]);
 	  X=X+Vm*y ;
-	  //g=g-(R.row(n)).dot(y);
-	  //r= g*W[1]*((Q.transpose())*en);
-	  r=b-A*X;
-	  //r=Beta*e1-W[0]*y;
-	  //r=b-A*X;
-	  Beta =sqrt(r.dot(r)) ;
-	  //Beta=sqrt( (Beta*e1-W[0]*y).dot(Beta*e1-W[0]*y));
-	  //Beta=g;
-	  //cout<<Beta<<endl;
-	  cout<<k<<endl;
+	  r= g*W[1]*((Q.transpose()).col(n));
+	  Beta=g;
 	  mon_flux << k+1 << " " << Beta << endl;
 	  k += 1 ;
 	}
@@ -407,6 +371,8 @@ Eigen::VectorXd GMRes(Eigen::VectorXd x0, Eigen::VectorXd b, int kmax, Eigen::Ma
     }
   return X;
 }
+
+//-----------------------------------------------------------------------------------------------------------------------//
 
 Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double, Dynamic, Dynamic> A, int kmax, double epsilon){
   int n=x0.size();
@@ -453,6 +419,10 @@ Eigen::VectorXd GradienConjugue(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Ma
   }
   return x;
 }
+
+
+//------------------------------------------------------------------------------------------------------------------//
+
 Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double, Dynamic, Dynamic> A, int kmax,double epsilon){
   int n=x0.size();
   int k=0;
@@ -466,12 +436,9 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
   W1.resize(n,n);
   r.resize(n);
   y.resize(n);
-  //p.resize(n);
-  //z.resize(n);
   x.resize(n);
   x=x0;
   r=b-A*x0;
-  //p=r;
   beta=sqrt(r.dot(r));
   e1.resize(n) ;
   for (int i=0 ; i<n ; ++i)
@@ -509,7 +476,7 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
 
 
 
-
+//----------------------------------------------------------------------------------------------------------//
 
 
 vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixXd A)
@@ -561,16 +528,7 @@ vector<Eigen::Matrix<double, Dynamic, Dynamic>>  qr_decomposition(Eigen::MatrixX
 }
 
 
-
-
-
-
-
-
-
-
-
-
+//----------------------------------------------------------------------------------------------------//
 
 Eigen::VectorXd qr_resolution_fom(Eigen::MatrixXd A, Eigen::VectorXd b)
 {
@@ -601,8 +559,7 @@ Eigen::VectorXd qr_resolution_fom(Eigen::MatrixXd A, Eigen::VectorXd b)
 
 }
 
-
-
+//-----------------------------------------------------------------------------------------------//
 
 Eigen::VectorXd resolution_Gm(Eigen::MatrixXd R, Eigen::VectorXd q){
   Eigen::VectorXd x;
