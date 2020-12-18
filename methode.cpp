@@ -459,7 +459,7 @@ Eigen::VectorXd FOM(Eigen::VectorXd x0, Eigen::VectorXd b, Eigen::Matrix<double,
 	W=Arnoldi(r,A);
 	W0=new_matrix(W[0]);//contient Hm
 	W1=new_matrixx(W[1]);//contient Vm
-	//y=cholesky_resolution(W0,beta*e1);
+	//y=cholesky_tri_resol(W0,beta*e1);
 	y=qr_resolution_fom(W0,beta*e1);
 	//cout<<y<<endl;
 	x=x+W1*y;
